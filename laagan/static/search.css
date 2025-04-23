@@ -1,0 +1,13 @@
+.search {
+    width: 50%;
+    padding-right: 64px;
+}
+
+.body-header {
+    display: flex;
+    align-items: center;
+}
+
+.btn.enter:hover i {
+    color: #E17564;
+}

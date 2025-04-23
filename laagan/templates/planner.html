@@ -1,0 +1,178 @@
+{% extends 'layout.html' %}
+
+
+{% block links %}
+    <link href="/static/planner.css" rel="stylesheet">
+{% endblock %}
+
+
+{% block title %}
+    Planner
+{% endblock %}
+
+
+{% block main %}
+<div class="main">
+
+<ul class="nav nav-underline nav-fill w-50 mx-auto mb-3 text-dark">
+    <li class="nav-item">
+        <a class="nav-link active text-dark" href="{{ url_for('attractions', title=session['title'], location=location, page=1) }}">Attractions</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" href="{{ url_for('finalize', mode=session['finalize_mode'] or 'init') }}">Finalize and Save</a>
+    </li>
+</ul>
+
+<div class="container px-0 mx-0 w-100 border-top border-light-subtle" id="content-area">
+    <div class="row g-0 h-100">
+        <div class="col-md-7 p-3 overflow-y-auto" style="max-height: 100%;">
+            <div class="row rows-cols-1 row-cols-xl-2 row-cols-xxl-3 g-4 text-start">
+                {% set start_idx = (page - 1) * 12 %}
+                {% set ns = namespace(idx=0) %}
+                {% for attraction in attractions %}
+                {% set ns.idx = loop.index0 + start_idx %}
+                {% set title = attraction['name'] %}
+                <div class="col">   
+                    <div class="card h-100 location-card" data-lat="{{ attraction['location']['lat'] }}" data-lng="{{ attraction['location']['lng'] }}">
+                        {% if attraction['photos'] %}
+                        <img src="/static/google_photos/{{ location }}/{{ attraction['photos'] }}" alt="{{ title[:20] }}" class="card-img-top" style="height: 200px; object-fit: cover; width: 100%;">
+                        {% else %}
+                        <img src="/static/google_photos/default.jpg" class="card-img-top" alt="No photo available">
+                        {% endif %}
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <p class="card-title me-auto mb-0" style="font-size: medium;">{{ title if title|length < 20 else title[:20] ~ '...' }}</p>
+                                <button type="button" class="btn enter border-0 p-0" onclick="saveToSession({{ ns.idx }})"><a class="text-decoration-none text-dark">
+                                    <i class="bi bi-file-plus" style="font-size:1.25rem;"></i>
+                                </a></button>
+                            </div>
+                            <small>
+                                <div class="d-flex justify-content-start">
+                                    <i class="bi bi-star-fill pe-2"></i>
+                                    <p class="mb-1">{{ attraction['rating'] }} ({{ attraction['user_ratings_total'] }})</p>
+                                </div>
+                            </small>
+                            <p class="card-text"><small class="text-body-secondary">{% if attraction['overview'] %}{{ attraction['overview'] }}{% endif %} Located at {{ attraction['vicinity'] }}.</small></p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="mt-5 d-flex justify-content-center">
+                <nav>
+                    <ul class="pagination">
+                      <li class="page-item">
+                        <a class="page-link text-dark" href="{{ url_for('attractions', title=session['title'], location=location, page=page - 1) }}"><span>&laquo;</span></a>
+                      </li>
+                      
+                      {% for i in pages_to_display %}
+                      <li class="page-item {% if i == page %}active{% endif %}"><a class="page-link text-dark" href="{{ url_for('attractions', title=session['title'], location=location, page=i) }}">{{ i }}</a></li>
+                      {% endfor %}
+
+                      <li class="page-item"><a class="page-link text-dark" href="{{ url_for('attractions', title=session['title'], location=location, page=page + 1) }}">
+                        <span>&raquo;</span></a>
+                      </li>
+                    </ul>
+                </nav>
+            </div>
+
+        </div>
+        <div class="col-md-5" id="map"></div>
+            <!-- Map Area -->
+        </div>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toast-container">
+    <!-- Toasts here -->
+</div>
+
+</div>
+
+<script>
+    function initMap() {
+        let location = {lat:{{ lat }}, lng: {{ lng }} };
+        let map = new google.maps.Map(
+            document.getElementById('map'), {zoom: 12, center: location}
+        );
+        let marker = new google.maps.Marker({position: location, map: map});
+
+        let markers = [];
+
+        let locationCards = document.querySelectorAll('.location-card');
+        locationCards.forEach((card, index) => {
+            let lat = parseFloat(card.getAttribute('data-lat'));
+            let lng = parseFloat(card.getAttribute('data-lng'));
+
+            let marker = new google.maps.Marker({
+                position: {lat, lng}, map: map, visible: false
+            });
+
+            markers.push(marker);
+
+            card.addEventListener('mouseenter', () => {
+                marker.setVisible(true);
+            });
+
+            card.addEventListener('mouseleave', () => {
+                marker.setVisible(false);
+            });
+        });
+    }
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ js_api_key }}&v=3&callback=initMap"></script>
+
+<script>
+    window.addEventListener('beforeunload', function() {
+        fetch('/clear_session', { method: 'POST' });
+    });
+</script>
+
+<script>
+    function saveToSession(value) {
+        fetch('/planner/attractions/add-to-itinerary', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ value: value })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.message);
+            showToast(data.message, data.status)
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+    function showToast(message, alertType) {
+        let toastContainer = document.getElementById('toast-container');
+
+        let toast = document.createElement('div');
+        toast.className = `toast text-${alertType}-emphasis bg-${alertType}-subtle border border-${alertType}-subtle rounded-3`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-${alertType} me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+
+        toastContainer.appendChild(toast);
+
+        let bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+
+        toast.addEventListener('hidden.bs.toast', () => {
+            toast.remove();
+        });
+}
+</script>
+
+{% endblock %}

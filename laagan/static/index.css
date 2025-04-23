@@ -1,0 +1,43 @@
+.title {
+    padding: 16px 0;
+}
+
+.title h1 {
+    font-size: 64px;
+}
+
+.caption {
+    padding: 12px 0;
+}
+
+.caption h2 {
+    font-size: 24px;
+}
+
+.search {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+    margin: 0 auto; 
+    padding: 12px 0;
+}
+
+.search form {
+    display: flex;
+    width: 100%;
+    gap: 16px;
+}
+
+.search input {
+    flex: 1;
+}
+
+.search button {
+    padding: 5px 15px;
+}
+
+.card {
+    margin: 0px 64px;
+}
+

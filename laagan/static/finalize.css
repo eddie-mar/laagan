@@ -1,0 +1,7 @@
+form {
+    text-align: left;
+}
+
+.btn.enter:hover i {
+    color: #E17564;
+}

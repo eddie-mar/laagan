@@ -1,0 +1,56 @@
+{% extends 'layout.html' %}
+
+{% block links %}
+    <link href="/static/search.css" rel="stylesheet">
+{% endblock %}
+
+{% block title %}
+    Search
+{% endblock %}
+
+
+{% block search %}
+
+<div class="search mx-auto pt-3">
+    <form action="/search" method="GET" class="d-flex align-items-center" width="75%">
+        <input class="form-control me-4" type="text" placeholder="Search a place"
+        autocomplete="off" autofocus name="q">
+        <button class="btn btn-dark" type="submit">Search</button>
+    </form>
+</div>
+
+{% endblock %}  
+
+
+{% block main %}
+
+{% for place in places %}
+    {% if place['ok'] %}
+    {% set title = place['name'] %}
+    {% set overview = place['overview'] %}
+<div class="card w-75 mb-4 mx-auto">
+    <div class="row g-0">
+        <div class="col-md-3">
+            {% if place['photo'] %}
+            <img src="/static/google_photos/{{ place['photo'] }}" class="img-fluid rounded-start" alt="{{ place['name'][:20] }}" style="max-height: 200px; object-fit: cover; width: 100%;">
+            {% else %}
+            <img src="/static/google_photos/default.jpg" class="img-fluid rounded-start" alt="No photo available" style="max-height: 200px; object-fit: cover; width: 100%;">
+            {% endif %}
+        </div>
+        <div class="col-md-9">
+            <div class="card-body p-2 ms-2">
+                <div class="body-header mb-2">
+                    <h5 class="card-title me-auto pt-2"><strong>{{ title if title|length < 50 else title[:50] ~ '...' }}</strong></h5>
+                    <button type="button" class="btn enter border-0"><a class="text-decoration-none text-dark" href="{{ url_for('attractions', title=title , location=place['location']['lat'] ~ ',' ~ place['location']['lng'], page=1) }}">
+                        <i class="bi bi-box-arrow-right" style="font-size:1.25rem;"></i>
+                    </a></button>
+                </div>
+                <p class="card-text text-start fw-light"><small class="text-body-secondary">{{ overview if overview|length < 250 else overview[:250] ~ ' . . .' }}</small></p>
+            </div>  
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
+{% endblock %}
