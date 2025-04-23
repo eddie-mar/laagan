@@ -1,0 +1,54 @@
+{% extends 'layout.html' %}
+
+{% block links %}
+    <link href="/static/trips.css" rel="stylesheet">
+{% endblock %}
+
+{% block title %}
+    Trips
+{% endblock %}
+
+
+{% block main %}
+<div class="container mx-auto pb-3">
+    <h4><strong>TRIPS SAVED</strong></h4>
+</div>
+
+    {% for trip in trips %}
+    <div class="card w-75 mb-4 mx-auto">
+        <div class="row g-0">
+            <div class="col-md-3">
+                {% if trip['photo'] %}
+                <img src="{{ trip['photo'] }}" class="img-fluid rounded-start" alt="{{ trip['name'] }}" style="max-height: 200px; object-fit: cover; width: 100%;">
+                {% else %}
+                <img src="/static/google_photos/default.jpg" class="img-fluid rounded-start" alt="No photo available" style="max-height: 200px; object-fit: cover; width: 100%;">
+                {% endif %}
+            </div>
+            <div class="col-md-9">
+                <div class="card-body p-2 ms-2">
+                    <div class="body-header mb-2">
+                        <h5 class="card-title me-auto pt-2"><strong>{{ trip['name'] }}</strong></h5>
+                        <button type="button" class="btn enter border-0"><a class="text-decoration-none text-dark" href="{{ url_for('trip_view', id=trip['id']) }}">
+                            <i class="bi bi-box-arrow-right" style="font-size:1.25rem;"></i>
+                        </a></button>
+                    </div>
+                    <p class="card-text text-start fw-light"><small class="text-body-secondary">
+                        {% for place in trip['places'] %} 
+                            {% if loop.last %}  
+                                and {{ place }}.
+                            {% else %}
+                                {{ place }}, 
+                            {% endif %} 
+                        {% endfor %}
+                        <br>From: {{ trip['date_from'].strftime('%A %d %B, %Y') }} 
+                        <br>To: {{ trip['date_until'].strftime('%A %d %B, %Y') }}</small></p>
+                </div>  
+            </div>
+        </div>
+    </div>
+    
+    {% endfor %}
+
+
+
+{% endblock %}

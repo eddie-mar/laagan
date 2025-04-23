@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+
+
+{% block links %}
+    <link href="/static/index.css" rel="stylesheet">
+{% endblock %}
+
+
+{% block title %}
+    Laagan
+{% endblock %}
+
+
+{% block main %}
+
+<div class="card text-center shadow p-3 mb-5 bg-body-tertiary rounded">
+    <div class="card-body">
+        <div class="title">
+            <h1>Laagan</h1>
+        </div>
+
+        <div class="caption">
+            <h2>Your DIY Travel Planner</h2>
+        </div>
+
+        <div class="search">
+            <form action="/search" method="GET">
+                <input class="form-control" type="text" placeholder="Search a place"
+                autocomplete="off" autofocus name="q">
+                <button class="btn btn-dark" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

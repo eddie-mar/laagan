@@ -1,0 +1,245 @@
+{% extends 'layout.html' %}
+
+
+{% block links %}
+    <link href="/static/planner.css" rel="stylesheet">
+    <link href="/static/finalize.css" rel="stylesheet">
+{% endblock %}
+
+
+{% block title %}
+    Finalize
+{% endblock %}
+
+
+{% block main %}
+<div class="main">
+
+<ul class="nav nav-underline nav-fill w-50 mx-auto mb-3 text-dark">
+    <li class="nav-item">
+        <a class="nav-link text-dark" href="{{ url_for('attractions', title=session['title'], location=session['location'], page=1) }}">Attractions</a>     <!--I need to pass session['title'] and session['location'] from edit-->
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active text-dark" href="{{ url_for('finalize', mode=session['finalize_mode'] or 'init') }}">Finalize and Save</a>
+    </li>
+</ul>
+
+<div class="container px-0 mx-0 w-100 border-top border-light-subtle" id="content-area">
+    <div class="container px-5 py-3 mx-auto w-75" id="edit-area">
+
+        <form action="{{ url_for('finalize', mode=mode) }}" method="post">
+
+            <input type="hidden" name="location" value="{{ session.get('location') }}">
+
+            <div class="row g-3 mb-3 ms-2 align-items-center">
+                <div class="col-auto">
+                    <label for="title" class="col-form-label">Itinerary Title</label>
+                </div>
+                <div class="col-6">
+                    <input type="text" name="title" class="form-control border border-black" value="{{ title }}" required>
+                </div>
+            </div>
+            <div class="row g-3 mb-3 ms-2">
+                <div class="col-md-4">
+                    <label for="date-from" class="form-label">Start of itinerary:</label>
+                    <input type="date" name="date-from" class="form-control" required {% if edit_only %}value="{{ date_from.strftime('%Y-%m-%d') }}"{% endif %}>
+                </div>
+                <div class="col-md-4">
+                    <label for="date-to" class="form-label">End of itinerary:</label>
+                    <input type="date" name="date-to" class="form-control" required {% if edit_only %}value="{{ date_to.strftime('%Y-%m-%d') }}"{% endif %}>
+                </div>
+            </div>
+
+            <div id="places-container">
+
+            {% if edit_only %}
+                {% for trip in trips %}
+                {% set i = loop.index %}
+            <div class="row mb-4 p-3 border border-black">
+                <!--Title-->
+                    <input type="hidden" name="idx{{i}}" value="{{ trip.get('idx', '-1') }}">
+                    <input type="hidden" name="type{{i}}" value="{{ trip.get('type', 'None') }}">
+                    <div class="col-md-9 mb-2">
+                        <label for="name{{i}}" class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name{{i}}" value="{{ trip['name'] }}" required> 
+                    </div>
+                    <div class="col-md-3 d-flex justify-content-end align-items-start">
+                        <button type="button" class="btn enter border-0 p-0" onclick="deleteRow(this)"><a class="text-decoration-none text-dark">
+                            <i class="bi bi-trash" style="font-size:1.75rem;"></i>
+                        </a></button>
+                    </div>
+                        {% if trip['idx']|int == -1 and mode == 'init' %}  <!--If manually made-->
+                        <div class="col-md-4">
+                            <label for="id{{i}}" class="form-label">Type</label>
+                            <select class="form-select" name="id{{i}}" required>
+                                <option value="Place" {% if trip['type']=='Place' %} selected {% endif %}>Place</option>
+                                <option value="Activity" {% if trip['type']=='Activity' %} selected {% endif %}>Activity</option>
+                                <option value="Hotel" {% if trip['type']=='Hotel' %} selected {% endif %}>Hotel</option>
+                                <option value="Flight" {% if trip['type']=='Flight' %} selected {% endif %}>Flight</option>
+                                <option value="Travel time" {% if trip['type']=='Travel time' %} selected {% endif %}>Travel time</option>
+                                <option value="Other" {% if trip['type']=='Other' %} selected {% endif %}>Other</option>
+                            </select>
+                        </div>
+                        {% else %}
+                        <input type="hidden" class="form-control" name="id{{i}}" value="{{ trip['id'] }}" readonly> <!--value  place_id -->
+                        {% endif %}
+                <!--Days-->
+                    <div class="col-md-2 mb-2">
+                        <label for="day{{i}}" class="form-label">What Day:</label>
+                        <input type="text" name="day{{i}}" class="form-control" required value="{{ trip['day'] }}">
+                    </div>
+                <!--Time from-->
+                    <div class="col-md-3 mb-2">
+                        <label for="time-from{{i}}" class="form-label">Time from:</label>
+                        <input type="time" name="time-from{{i}}" class="form-control" required 
+                        value="{%if trip['time-from'] is not string %}{{trip['time-from'].strftime('%H:%M')}}{% else %}{{trip['time-from']}}{% endif %}">
+                    </div>
+                    <!--Time until-->
+                    <div class="col-md-3">
+                        <label for="time-to{{i}}" class="form-label">Time until:</label>
+                        <input type="time" name="time-to{{i}}" class="form-control" required 
+                        value="{%if trip['time-to'] is not string %}{{trip['time-to'].strftime('%H:%M')}}{% else %}{{trip['time-to']}}{% endif %}">
+                    </div>
+                <!--Additional comment-->
+                    <div class="col-12">
+                        <label for="notes{{i}}" class="form-label">Notes</label>
+                        <textarea type="text" name="notes{{i}}" class="form-control" rows="3">{{ trip['notes'] }}</textarea>
+                    </div>
+            </div>
+                {% endfor %}
+            
+            {% endif %}
+
+            {% if indices %}
+
+                {% for idx in indices %}
+                {% set i = loop.index + start %}
+            <div class="row mb-4 p-3 border border-black">
+                <!--Title-->
+                    <input type="hidden" name="idx{{i}}" value="{{ idx }}">
+                    <input type="hidden" name="type{{i}}" value="Place">
+                    <div class="col-md-9 mb-2">
+                        <label for="name{{i}}" class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name{{i}}" value="{{ attractions[idx]['name'] }}" required> 
+                    </div>
+                    <div class="col-md-3 d-flex justify-content-end align-items-start">
+                        <button type="button" class="btn enter border-0 p-0" onclick="deleteRow(this)"><a class="text-decoration-none text-dark">
+                            <i class="bi bi-trash" style="font-size:1.75rem;"></i>
+                        </a></button>
+                    </div>
+                    <input type="hidden" class="form-control" name="id{{i}}" value="{{ attractions[idx]['place_id'] }}" readonly> <!--value  place_id -->
+                <!--Days-->
+                    <div class="col-md-2 mb-2">
+                        <label for="day{{i}}" class="form-label">What Day:</label>
+                        <input type="text" name="day{{i}}" class="form-control" required>
+                    </div>
+                <!--Time from-->
+                    <div class="col-md-3 mb-2">
+                        <label for="time-from{{i}}" class="form-label">Time from:</label>
+                        <input type="time" name="time-from{{i}}" class="form-control" required>
+                    </div>
+                    <!--Time until-->
+                    <div class="col-md-3">
+                        <label for="time-to{{i}}" class="form-label">Time until:</label>
+                        <input type="time" name="time-to{{i}}" class="form-control" required>
+                    </div>
+                <!--Additional comment-->
+                    <div class="col-12">
+                        <label for="notes{{i}}" class="form-label">Notes</label>
+                        <textarea type="text" name="notes{{i}}" class="form-control" rows="3" placeholder="Additional comments, budgets, reminders, and etc . . ."></textarea>
+                    </div>
+            </div>
+                {% endfor %}
+
+            {% endif %}
+            
+            </div>
+
+            <div class="row g-3 mb-5 ms-2 align-items-start">
+                <div class="col-auto">
+                    <label for="description" class="col-form-label">General Notes</label>
+                </div>
+
+                <div class="col-9">
+                    <textarea type="text" class="form-control" name="description" rows="5">{% if general_description %}{{ general_description }}{% endif %}</textarea>
+                </div>
+            </div>
+
+            <div class="container mx-auto my-3" style="text-align: center;">
+                <button type="button" class="btn btn-primary" id="add-manually">Add place/activity manually</button>
+                <button type="submit" class="btn btn-dark" >Save itinerary</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</div>
+
+<script>
+    let placeIndex = {{ manual_idx_start }};
+
+    document.getElementById("add-manually").addEventListener("click", function () {
+        let container = document.getElementById("places-container");
+
+        let newEntry = document.createElement("div");
+        newEntry.classList.add("row", "mb-4", "p-3", "border", "border-primary-subtle", "place-entry");
+
+        newEntry.innerHTML = `
+            <input type="hidden" name="idx${placeIndex}" value="-1">
+            <input type="hidden" name="type${placeIndex}" value="None">
+            <div class="col-md-9 mb-2">
+                <label for="name${placeIndex}" class="form-label">Name</label>
+                <input type="text" class="form-control" name="name${placeIndex}" placeholder="Name of Place / Activity" required>
+            </div>
+            <div class="col-md-3 d-flex justify-content-end align-items-start">
+                <button type="button" class="btn enter border-0 p-0" onclick="deleteRow(this)"><a class="text-decoration-none text-dark">
+                    <i class="bi bi-trash" style="font-size:1.75rem;"></i>
+                </a></button>
+            </div>
+            <div class="col-md-4">
+                <label for="id${placeIndex}" class="form-label">Type</label>
+                <select class="form-select" name="id${placeIndex}" required>
+                    <option selected>Itinerary type</option>
+                    <option value="Place">Place</option>
+                    <option value="Activity">Activity</option>
+                    <option value="Hotel">Hotel</option>
+                    <option value="Flight">Flight</option>
+                    <option value="Travel time">Travel time</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="col-md-2 mb-2">
+                <label for="day${placeIndex}" class="form-label">What day:</label>
+                <input type="text" class="form-control" name="day${placeIndex}" required>
+            </div>
+            <div class="col-md-3 mb-2">
+                <label for="time-from${placeIndex}" class="form-label">Time from:</label>
+                <input type="time" class="form-control" name="time-from${placeIndex}" required>
+            </div>
+            <div class="col-md-3">
+                <label for="time-to${placeIndex}" class="form-label">Time until:</label>
+                <input type="time" class="form-control" name="time-to${placeIndex}" required>
+            </div>
+            <div class="col-12">
+                <label for="notes${placeIndex}" class="form-label">Additional details</label>
+                <textarea class="form-control" name="notes${placeIndex}" rows="3" placeholder="Additional comments, budgets, reminders, and etc . . ."></textarea>
+            </div>
+        `;
+
+        container.appendChild(newEntry);
+        placeIndex++;
+    });
+</script>
+
+<script>
+    function deleteRow(button) {
+    let row = button.closest('.row');
+    if (row) {
+        row.remove(); 
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends 'layout.html' %}
+
+
+{% block links %}
+    <link href="/static/trip_view.css" rel="stylesheet">
+{% endblock %}
+
+
+{% block title %}
+    View Itinerary
+{% endblock %}
+
+
+{% block main %}
+
+<div class="container images">
+    <div class="row g-0">
+        <div class="col-md-5 pe-2 my-2">
+            <img src="/{{ images[0][0] }}" class="img-fluid rounded hover-shadow cover-img" alt="{{ images[0][1] }}" onclick="openModal();currentSlide(1)" style="max-height: 400px;">
+        </div>
+        <div class="col-md-7 align-items-center">
+            <div class="row row-cols-xxl-3 row-cols-xl-2 rows-cols-1  g-0">
+                {% for image, caption in images[1:7] %}
+                {% set i = loop.index + 1 %}
+                <div class="col p-3">
+                    <img src="/{{ image }}" class="img-fluid rounded hover-shadow cover-img" alt="{{ caption }}" onclick="openModal();currentSlide({{ i }})">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<form action="{{ url_for('trip_view', id=id) }}" method="post">
+
+<div class="container head mb-2" style="text-align: left !important;">
+    <div class="title mt-3 mb-2 d-flex">
+        <h4 class="me-auto pt-2"><strong>{{ trip.itinerary_name }}</strong></h4>
+        <div class="button-group g-0">
+            <button type="submit" name="action" value="save" class="btn enter border-0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Save changes"><a class="text-decoration-none text-dark">
+                <i class="bi bi-save" style="font-size:1.25rem;"></i>
+            </a></button>
+            <button type="submit" name="action" value="edit" class="btn enter border-0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit changes"><a class="text-decoration-none text-dark">
+                <i class="bi bi-pencil-square" style="font-size:1.25rem;"></i>
+            </a></button>
+            <button type="button" class="btn enter border-0" data-bs-toggle="modal" data-bs-target="#delete"><a class="text-decoration-none text-dark">
+                <i class="bi bi-trash" style="font-size:1.25rem;"></i>
+            </a></button>
+        </div>
+    </div>
+    <div class="body">
+        <p><small class="text-body-secondary">
+            From:&emsp;{{ date_from }}<br>
+            To:&emsp;&emsp;  {{ date_to }}
+        </small></p>
+    </div>
+</div>
+
+<div class="container body mb-2 mt-2 text-start border-top border-light-subtle">
+
+{% for day in itinerary %}
+{% set i = loop.index %}
+    <div class="day-container mt-3 mb-5">
+        <p class="fw-bold mb-3">Day {{i}}</p>
+        {% for activity in day %}
+        {% set j = loop.index %}
+        <div class="container d-flex flex-column border-start border-secondary mb-4 ms-3 w-75">
+            <p class="title mb-0"><strong>{{ activity['name'] }}</strong></h5>
+            <p class="text mb-1"><small class="text-body-secondary">{{ activity['time_from'].strftime('%I:%M %p') }}  -  {{ activity['time_until'].strftime('%I:%M %p') }}</small></p>
+            <p class="text"><small class="text-body-secondary">{{ activity['vicinity'] }}</small></p>
+            <input type="hidden" name="itinerary_id{{i ~ '_' ~ j}}" value="{{ activity['id'] }}">
+            <input type="hidden" name="name{{i ~ '_' ~ j}}" value="{{ activity['name'] }}">
+            <textarea type="text" name="notes{{i ~ '_' ~ j}}" class="form-control" rows="3" {% if not activity['notes'] %} placeholder="Comments, budgets, reminders, and etc . . ." {% endif %}>{{ activity['notes'] }}</textarea>
+        </div>
+        {% endfor %}
+    </div>
+{% endfor %}
+
+</div>
+
+
+<div class="container footer text-start">
+    <label for="description" class="col-form-label">General Notes</label>
+    <textarea type="text" name="description" class="form-control" rows="5">{{ trip.notes }}</textarea>
+</div>
+
+
+<!-- Modal -->
+  <div class="modal fade" id="delete" tabindex="-1" aria-labelledby="deleteItinerary" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="deleteLabel">Delete Itinerary</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete itinerary ?
+        </div>
+        <div class="modal-footer">
+          <button type="submit" name="action" value="delete" class="btn btn-danger">Delete Itinerary</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</form>
+
+
+<!--Modal-->
+<div id="myModal" class="slideModal">
+    <span class="close cursor" onclick="closeModal()">&times;</span>
+    <div class="modalContent">
+    {% for image, caption in images %}
+    {% set i = loop.index %}
+        <div class="mySlides">
+            <div class="numbertext">{{ i }} / {{ images|length }}</div>
+            <img class="modalImages" src="/{{ image }}" style="width:100%" alt="{{ caption }}">
+        </div>
+    {% endfor %}
+  
+      <!-- Next/previous controls -->
+      <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+      <a class="next" onclick="plusSlides(1)">&#10095;</a>
+  
+      <!-- Caption text -->
+      <div class="caption-container">
+        <p id="caption"></p>
+      </div>
+
+    </div>
+  </div>
+
+
+
+  <script>
+    // Open the Modal
+    function openModal() {
+      document.getElementById("myModal").style.display = "block";
+    }
+    
+    // Close the Modal
+    function closeModal() {
+      document.getElementById("myModal").style.display = "none";
+    }
+    
+    var slideIndex = 1;
+    showSlides(slideIndex);
+    
+    // Next/previous controls
+    function plusSlides(n) {
+      showSlides(slideIndex += n);
+    }
+    
+    // Thumbnail image controls
+    function currentSlide(n) {
+      showSlides(slideIndex = n);
+    }
+    
+    function showSlides(n) {
+      var i;
+      var slides = document.getElementsByClassName("mySlides");
+      var slideAlt = document.getElementsByClassName("modalImages");
+      var captionText = document.getElementById("caption");
+      if (n > slides.length) {slideIndex = 1}
+      if (n < 1) {slideIndex = slides.length}
+      for (i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";
+      }
+      slides[slideIndex-1].style.display = "block";
+      captionText.innerHTML = slideAlt[slideIndex-1].alt;
+    }
+    </script>
+{% endblock %}

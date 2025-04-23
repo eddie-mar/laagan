@@ -1,0 +1,12 @@
+main.container {
+    padding-top: 2rem !important
+}
+
+.body-header {
+    display: flex;
+    align-items: center;
+}
+
+.btn.enter:hover i {
+    color: #E17564;
+}

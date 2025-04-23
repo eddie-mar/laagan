@@ -1,0 +1,18 @@
+.accordion {
+    width: 75%;
+    margin: 0 auto;
+}
+
+.accordion-body form {
+    width: 75%;
+    margin: 0 auto;
+}
+
+label {
+    text-align: left;
+}
+
+.toggle-password {
+    border: none;
+    background: transparent;
+  }

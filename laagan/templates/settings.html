@@ -1,0 +1,261 @@
+{% extends 'layout.html' %}
+
+
+{% block links %}
+    <link href="/static/settings.css" rel="stylesheet">
+{% endblock %}
+
+
+{% block title %}
+    User Settings
+{% endblock %}
+
+
+{% block main %}
+
+<div class="accordion" id="accordionExample">
+
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+          User Account
+        </button>
+      </h2>
+      <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+            <form>
+                <div class="row mb-3">
+                    <label for="username" class="col-sm-2 col-form-label">Username</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="username" value="{{ username }}" readonly>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="email" class="col-sm-2 col-form-label">Email Address</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="email" value="{{ email }}" readonly>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="home-add" class="col-sm-2 col-form-label">Home Address</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="home-add" value="{{ home_add }}" readonly>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        
+        <div class="container" style="margin-bottom: 24px;">
+            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#changeInfo">Edit Account Information</button>
+            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#changePassword">Change Password</button>
+            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#deleteAccount">Delete Account</button>
+        </div>
+
+      </div>
+
+      <!--Modals-->
+      <div class="modal fade" id="changeInfo" tabindex="-1" aria-labelledby="changeInfo" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="changeInfoLabel">Edit Account Information</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/edit-account" method="POST">
+                        <div class="mb-3">
+                            <label for="edit-username" class="col-form-label">Username:</label>
+                            <input type="text" class="form-control" name="new-username" id="edit-username" value="{{ username }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-email" class="col-form-label">Email Address:</label>
+                            <input type="text" class="form-control" name="new-email" id="edit-email" value="{{ email }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-homeAdd" class="col-form-label">Home Address:</label>
+                            <input type="text" class="form-control" name="new-homeAdd" id="edit-homeAdd" value="{{ home_add }}">
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-dark">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="changePassword" tabindex="-1" aria-labelledby="changePassword" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="changePassword">Change Password</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/change-password" method="POST">
+                        <div class="mb-3 position-relative">
+                            <label for="check-pass" class="col-form-label">Current Password:</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="current-pass" id="check-pass" placeholder="Enter current password">
+                                <span class="input-group-text bg-white border-0">    
+                                    <button type="button" class="btn p-0 toggle-password" data-target="check-pass" aria-label="Show password">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="mb-3 position-relative">
+                            <label for="new-pass" class="col-form-label">New Password:</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="change-pass" id="new-pass" placeholder="Enter new password">
+                                <span class="input-group-text bg-white border-0">    
+                                    <button type="button" class="btn p-0 toggle-password" data-target="new-pass" aria-label="Show password">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mb-3 position-relative">
+                            <label for="confirm-pass" class="col-form-label">Current Password:</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="verify-pass" id="confirm-pass" placeholder="Confirm new password">
+                                <span class="input-group-text bg-white border-0">    
+                                    <button type="button" class="btn p-0 toggle-password" data-target="confirm-pass" aria-label="Show password">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-dark">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal fade" id="deleteAccount" tabindex="-1" aria-labelledby="deleteAccount" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="h4">Are you sure you want to delete your account?</p>
+                </div>
+                <form action="/delete-account" method="POST">
+                <div class="modal-footer">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="btn btn-danger">Delete Account</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+          App Settings
+        </button>
+      </h2>
+      <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+            <form>
+                <div class="row mb-3">
+                    <label for="map-radius" class="col-sm-2 col-form-label">Map Radius</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="map-radius" value="{{ radius }}" readonly data-bs-toggle="tooltip" data-bs-placement="right" title="Radius (km) of map search. 10 - 250 km">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="search-limit" class="col-sm-2 col-form-label">Place Search Max</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="search-limit" value="{{ limit }}" readonly data-bs-toggle="tooltip" data-bs-placement="right" title="Max number of places to display in attractions search">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="container" style="margin-bottom: 24px;">
+            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#changeSettings">Change Settings</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!--Modals-->
+    <div class="modal fade" id="changeSettings" tabindex="-1" aria-labelledby="changeRadius" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="changeSettingLabel">Change Settings</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/change-setting" method="POST">
+                        <div class="mb-3">
+                            <label for="change-radius" class="col-form-label">Map Radius:</label>
+                            <input type="text" class="form-control" name="new-radius" id="change-radius" value="{{ radius }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="change-search-limit" class="col-form-label">Search Limit:</label>
+                            <input type="text" class="form-control" name="new-limit" id="change-limit" value="{{ limit }}">
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-dark">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+    document.querySelectorAll('.toggle-password').forEach(button => {
+      button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target');
+        const passwordField = document.getElementById(targetId);
+        const icon = this.querySelector('i');
+
+        if (passwordField.type === 'password') {
+          passwordField.type = 'text';
+          icon.classList.remove('bi-eye');
+          icon.classList.add('bi-eye-slash');
+          this.setAttribute('aria-label', 'Hide password');
+        } else {
+          passwordField.type = 'password';
+          icon.classList.remove('bi-eye-slash');
+          icon.classList.add('bi-eye');
+          this.setAttribute('aria-label', 'Show password');
+        }
+      });
+    });
+  </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}
