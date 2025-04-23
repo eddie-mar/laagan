@@ -17,10 +17,10 @@ Laagan is a simple web application that helps users plan their travel itinerarie
 I made this web app as a project to practice my programming skills. I know the app has still a lot of bugs, code is a bit messy, and is not yet streamlined which I've yet to solve in my free time.
 
 ### Download the source code and run:
-git clone https://github.com/eddie-mar/laagan.git
-cd laagan
-pip install -r requirements.txt
-*open helpers.py file and change api key
+git clone https://github.com/eddie-mar/laagan.git<br>
+cd laagan<br>
+pip install -r requirements.txt<br>
+*open helpers.py file and change api key<br>
 flask run
 
 
