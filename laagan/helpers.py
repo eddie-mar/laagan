@@ -9,8 +9,8 @@ from functools import wraps
 from flask import session, redirect, url_for, flash
 from pprint import pprint
 
-JAVASCRIPT_MAPS_API_KEY = 'AIzaSyDLDFyHQihmHzL0cSbCM09v_h8TLTyW314'
-API_KEY = 'AIzaSyDVFeGFwyK2VG6NA6_mz0N-dOF80pghfEo'
+JAVASCRIPT_MAPS_API_KEY = 'YOUR_API_KEY'
+API_KEY = 'YOUR_API_KEY'
 
 map_client = googlemaps.Client(API_KEY)
 
